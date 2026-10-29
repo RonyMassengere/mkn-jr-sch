@@ -1,0 +1,395 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@plugin '@tailwindcss/typography';
+
+/*
+  Mukono Junior School — logo-led design system.
+  Palette uses the school's crimson, royal blue, bright yellow, black, and
+  white brand colors.
+*/
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Named brand tokens */
+  --color-leaf: var(--leaf);
+  --color-leaf-deep: var(--leaf-deep);
+  --color-terracotta: var(--terracotta);
+  --color-gold: var(--gold);
+  --color-cream: var(--cream);
+  --color-charcoal: var(--charcoal);
+
+  --font-display: var(--font-baloo), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+}
+
+:root {
+  color-scheme: light;
+
+  --cream: #ffffff;
+  --charcoal: #171717;
+  --leaf: #3d4ca3;
+  --leaf-deep: #303f9f;
+  --terracotta: #c91f2b;
+  --gold: #f7e600;
+
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #303f9f;
+  --primary-foreground: #ffffff;
+  --secondary: #f7e600;
+  --secondary-foreground: #171717;
+  --muted: #f3f4ff;
+  --muted-foreground: #555b72;
+  --accent: #c91f2b;
+  --accent-foreground: #ffffff;
+  --destructive: #a81822;
+  --border: #d9dcf2;
+  --input: #d9dcf2;
+  --ring: #c91f2b;
+
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) var(--muted);
+  }
+  html::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  html::-webkit-scrollbar-track {
+    background: var(--muted);
+  }
+  html::-webkit-scrollbar-thumb {
+    border: 3px solid var(--muted);
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--primary), var(--accent));
+  }
+  html::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
+  }
+  html::-webkit-scrollbar-corner {
+    background: var(--muted);
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    overflow-x: hidden;
+  }
+
+  @media (max-width: 767px) {
+    .max-w-6xl,
+    .max-w-5xl,
+    .max-w-3xl,
+    .max-w-2xl {
+      max-width: calc(100% - 1.5rem);
+    }
+  }
+
+  @media (max-width: 440px) {
+    .parent-hub-page {
+      width: 100%;
+    }
+
+    .parent-hub-shell {
+      max-width: 100%;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    .parent-hub-header {
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .parent-hub-title {
+      font-size: clamp(1.7rem, 7vw, 2.3rem);
+      letter-spacing: -0.03em;
+    }
+
+    .parent-hub-button {
+      width: 100%;
+    }
+
+    .parent-resource-card,
+    .school-calendar-card,
+    .key-dates-card {
+      border-radius: 1rem;
+      padding: 0.9rem;
+    }
+
+    .resource-header,
+    .calendar-header {
+      align-items: flex-start;
+    }
+
+    .resource-badge,
+    .calendar-badge {
+      align-self: flex-start;
+      margin-top: 0.15rem;
+    }
+
+    .resource-item {
+      padding: 0.85rem;
+    }
+
+    .resource-item-head {
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .resource-item-head .size-11 {
+      width: 2.5rem;
+      height: 2.5rem;
+      min-width: 2.5rem;
+    }
+
+    .resource-item h2 {
+      font-size: 1rem;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .resource-meta {
+      gap: 0.5rem 0.75rem;
+      font-size: 0.68rem;
+    }
+
+    .resource-item-download {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .calendar-embed {
+      overflow: hidden;
+      border-radius: 0.9rem;
+    }
+
+    .calendar-embed iframe {
+      min-height: 320px;
+      height: 340px;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    html {
+      scrollbar-width: none;
+    }
+    html::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+}
+
+@layer utilities {
+  /* Hand-drawn style underline used on section headings + nav links */
+  .accent-underline {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='12' viewBox='0 0 120 12' fill='none'%3E%3Cpath d='M2 7c20-5 44-5 66-2 18 2 34 1 50-3' stroke='%23D9633B' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: 100% 0.5em;
+    padding-bottom: 0.35em;
+  }
+
+  /* Frosted white glass with the school's logo colors */
+  .glass-cream {
+    background-color: color-mix(in srgb, var(--cream) 68%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, #ffffff 40%, transparent);
+    box-shadow: 0 12px 40px -12px color-mix(in srgb, var(--charcoal) 35%, transparent);
+  }
+
+  .glass-leaf {
+    background-color: color-mix(in srgb, var(--leaf-deep) 62%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+    box-shadow: 0 12px 40px -12px color-mix(in srgb, #000000 45%, transparent);
+  }
+
+  .glass-purple {
+    background-color: color-mix(in srgb, var(--leaf-deep) 68%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .paper-bg {
+    background-image: url('/images/paper-texture.png');
+    background-size: 420px;
+    background-repeat: repeat;
+  }
+
+  .skeleton-base {
+    background: linear-gradient(90deg, rgba(48, 63, 159, 0.08) 25%, rgba(247, 230, 0, 0.12) 50%, rgba(48, 63, 159, 0.08) 75%);
+    background-size: 200% 100%;
+  }
+
+  .skeleton-shimmer {
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes showcase-next {
+    from {
+      opacity: 0;
+      transform: translateX(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes showcase-previous {
+    from {
+      opacity: 0;
+      transform: translateX(-28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes showcase-image {
+    from {
+      opacity: 0.6;
+      transform: scale(1.08);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes showcase-copy {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes showcase-progress {
+    from {
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    to {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+  }
+
+  .animate-showcase-next {
+    animation: showcase-next 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .animate-showcase-previous {
+    animation: showcase-previous 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .animate-showcase-image {
+    animation: showcase-image 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .animate-showcase-copy {
+    animation: showcase-copy 520ms 100ms both cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .animate-showcase-progress {
+    animation: showcase-progress 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Scroll reveal: elements start hidden, .is-visible reveals them */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .animate-showcase-next,
+  .animate-showcase-previous {
+    will-change: opacity, transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .animate-showcase-next,
+  .animate-showcase-previous,
+  .animate-showcase-image,
+  .animate-showcase-copy,
+  .animate-showcase-progress {
+    animation: none !important;
+  }
+}
