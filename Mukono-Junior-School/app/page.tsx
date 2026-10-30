@@ -43,19 +43,19 @@ const utilityLinks = [
 
 const stats = [
   { value: 'Baby Class', label: 'to P.7 learning journey' },
-  { value: '100%', label: 'guided pastoral care and mentoring' },
-  { value: '4', label: 'core values that shape daily life' },
-  { value: '1', label: 'supportive community, one child at a time' },
+  { value: '4', label: 'core values: excellence, discipline, respect, and service' },
+  { value: 'Every child', label: 'encouraged through thoughtful pastoral care' },
+  { value: 'Whole-child', label: 'growth in learning, confidence, and character' },
 ] as const
 
 const announcements = [
   {
-    title: 'Admissions for the new academic year are now open.',
-    detail: 'Families are invited to begin the enrollment process early and schedule a personal school tour.',
+    title: 'Planning a school place for your child?',
+    detail: 'Talk with our admissions team about class placement, required documents, and the next steps for your family.',
   },
   {
-    title: 'Term calendar and holiday homework are available in the parent portal.',
-    detail: 'Parents can access our latest academic dates, school reminders, and downloadable resources.',
+    title: 'Keep school dates and home learning close at hand.',
+    detail: 'Visit the Parents’ Hub for the shared school calendar, holiday homework, notices, and family resources.',
   },
   {
     title: 'We are nurturing future-ready learners in a safe, stimulating campus.',

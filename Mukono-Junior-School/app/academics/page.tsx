@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import Link from 'next/link'
 import {
+  ArrowRight,
   Baby,
   BookOpen,
   Calculator,
   CheckCircle2,
   ClipboardCheck,
+  Clock3,
   Download,
   FlaskConical,
   GraduationCap,
@@ -82,6 +85,29 @@ const practicalLearning = [
   { icon: Palette, title: 'Creative Arts', body: 'Music, dance, drama, drawing, and making give children a space to express ideas and culture.' },
   { icon: Volleyball, title: 'Physical Education', body: 'Games and sports build fitness, teamwork, discipline, and resilience alongside classroom learning.' },
 ]
+
+const schoolDayRhythm = [
+  {
+    title: 'Welcome & readiness',
+    body: 'A calm start gives pupils time to settle, connect with their class, and prepare to learn.',
+  },
+  {
+    title: 'Focused morning learning',
+    body: 'Teacher-guided lessons build literacy, numeracy, subject knowledge, and confidence through explanation and practice.',
+  },
+  {
+    title: 'Break, refreshment & play',
+    body: 'Rest, movement, and social time help children return to learning refreshed and ready to participate.',
+  },
+  {
+    title: 'Practical learning & co-curricular growth',
+    body: 'Activities, creative work, games, and guided practice help pupils apply ideas and develop teamwork.',
+  },
+  {
+    title: 'Review & home connection',
+    body: 'Teachers reinforce learning, share relevant reminders, and help pupils prepare for the next school day.',
+  },
+] as const
 
 const resources = [
   {
@@ -200,6 +226,35 @@ export default function AcademicsPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
+        <SectionHeading
+          eyebrow="A Day at MJS"
+          title={<span className="accent-underline">A purposeful rhythm for learning and wellbeing</span>}
+          description="The school day balances focused lessons, movement, practical experiences, and pastoral care. Contact the school office for the current term timetable and class-specific timings."
+        />
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {schoolDayRhythm.map((period, index) => (
+            <Reveal key={period.title} delay={(index % 3) * 70}>
+              <article className="h-full rounded-2xl border border-border bg-card p-5 sm:p-6">
+                <span className="grid size-11 place-items-center rounded-xl bg-secondary text-secondary-foreground">
+                  {index === 0 ? <Clock3 className="size-5" /> : <BookOpen className="size-5" />}
+                </span>
+                <p className="mt-4 text-xs font-800 uppercase tracking-[0.14em] text-accent">Part {index + 1}</p>
+                <h3 className="mt-2 font-display text-xl font-800 text-primary">{period.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{period.body}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+        <Link
+          href="/contact#inquiry-form"
+          className="mt-7 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-800 text-accent-foreground transition-transform hover:scale-[1.02]"
+        >
+          Ask about the current class timetable
+          <ArrowRight className="size-4" />
+        </Link>
+      </section>
+
       <section className="bg-muted/50 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-5">
           <SectionHeading
@@ -213,7 +268,7 @@ export default function AcademicsPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
+      <section id="fee-structure" className="mx-auto max-w-6xl scroll-mt-28 px-5 py-16 sm:py-20">
         <SectionHeading
           eyebrow="Tuition & Fees"
           title={<span className="accent-underline">Transparent fees for families</span>}

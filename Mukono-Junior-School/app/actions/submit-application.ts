@@ -12,14 +12,28 @@ export type ApplicationFormState = {
   fieldErrors?: Partial<Record<string, string>>
 }
 
-const normalizeText = (value: FormDataEntryValue | null) => String(value ?? '').trim()
+const normalizeText = (value: FormDataEntryValue | null) =>
+  typeof value === 'string' ? value.trim() : ''
 
 const cleanPhoneNumber = (value: string) => value.replace(/[^+\d]/g, '').trim()
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (character) => {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }
+
+    return entities[character] ?? character
+  })
 
 const formatDisplayDate = (value: string) => {
   if (!value) return 'Not provided'
 
-  const date = new Date(value)
+  const date = new Date(`${value}T00:00:00.000Z`)
   if (Number.isNaN(date.getTime())) {
     return value
   }
@@ -28,15 +42,22 @@ const formatDisplayDate = (value: string) => {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
+    timeZone: 'UTC',
   }).format(date)
 }
 
 function getOfficeEmail() {
-  return process.env.ADMISSIONS_OFFICE_EMAIL ?? process.env.ADMIN_EMAIL ?? site.email
+  return process.env.ADMISSIONS_OFFICE_EMAIL?.trim() || process.env.ADMIN_EMAIL?.trim() || site.email
 }
 
 function getFromEmail() {
-  return process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim()
+
+  if (!fromEmail) {
+    throw new Error('RESEND_FROM_EMAIL is missing. Configure a verified sender address in Resend.')
+  }
+
+  return fromEmail
 }
 
 function buildStyledEmailTemplate({
@@ -56,8 +77,8 @@ function buildStyledEmailTemplate({
     .map(
       (row) => `
         <tr>
-          <td style="padding: 10px 12px; border-bottom: 1px solid #e8ebff; font-size: 13px; color: #303f9f; font-weight: 700; width: 180px; vertical-align: top;">${row.label}</td>
-          <td style="padding: 10px 12px; border-bottom: 1px solid #e8ebff; font-size: 13px; color: #171717; line-height: 1.6; vertical-align: top;">${row.value}</td>
+            <td style="padding: 10px 12px; border-bottom: 1px solid #e8ebff; font-size: 13px; color: #303f9f; font-weight: 700; width: 180px; vertical-align: top;">${escapeHtml(row.label)}</td>
+            <td style="padding: 10px 12px; border-bottom: 1px solid #e8ebff; font-size: 13px; color: #171717; line-height: 1.6; vertical-align: top;">${escapeHtml(row.value)}</td>
         </tr>`,
     )
     .join('')
@@ -67,13 +88,13 @@ function buildStyledEmailTemplate({
       <div style="max-width: 680px; margin: 0 auto; background-color: #ffffff; border: 1px solid #d9dcf2; border-radius: 18px; overflow: hidden;">
         <div style="background: linear-gradient(135deg, #303f9f 0%, #c91f2b 100%); padding: 24px 28px; color: #ffffff;">
           <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; opacity: 0.9;">Mukono Junior School</div>
-          <h1 style="margin: 10px 0 0; font-size: 28px; line-height: 1.2; color: #ffffff;">${title}</h1>
+          <h1 style="margin: 10px 0 0; font-size: 28px; line-height: 1.2; color: #ffffff;">${escapeHtml(title)}</h1>
         </div>
 
         <div style="padding: 24px 28px; background-color: #ffffff;">
-          <p style="margin: 0 0 18px; font-size: 15px; line-height: 1.7; color: #171717;">${intro}</p>
+          <p style="margin: 0 0 18px; font-size: 15px; line-height: 1.7; color: #171717;">${escapeHtml(intro)}</p>
           <div style="padding: 14px 16px; background-color: #fffbea; border-left: 4px solid #f7e600; border-radius: 10px; margin-bottom: 18px;">
-            <strong style="font-size: 14px; color: #303f9f;">${highlight}</strong>
+            <strong style="font-size: 14px; color: #303f9f;">${escapeHtml(highlight)}</strong>
           </div>
 
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; background-color: #ffffff; border: 1px solid #e8ebff; border-radius: 12px; overflow: hidden;">
@@ -84,7 +105,7 @@ function buildStyledEmailTemplate({
         </div>
 
         <div style="padding: 20px 28px 28px; background-color: #f7f8ff; border-top: 1px solid #e8ebff;">
-          <p style="margin: 0; font-size: 13px; line-height: 1.7; color: #555b72;">${footerLabel}</p>
+          <p style="margin: 0; font-size: 13px; line-height: 1.7; color: #555b72;">${escapeHtml(footerLabel)}</p>
           <p style="margin: 10px 0 0; font-size: 14px; font-weight: 700; color: #303f9f;">Mukono Junior School</p>
         </div>
       </div>
@@ -116,13 +137,16 @@ async function sendApplicationEmails(payload: {
   const resend = new Resend(resendApiKey)
   const officeEmail = getOfficeEmail()
   const fromEmail = getFromEmail()
+  const studentName = `${payload.studentFirstName} ${payload.studentLastName}`
+    .replace(/[\r\n]/g, ' ')
+    .slice(0, 164)
 
   const officeHtml = buildStyledEmailTemplate({
     title: 'Admissions Application Received',
     intro: 'A new student admissions application has been received and is ready for review by the school office.',
     highlight: `Application reference: ${payload.applicationId ?? 'Pending review'}`,
     rows: [
-      { label: 'Student Name', value: `${payload.studentFirstName} ${payload.studentLastName}` },
+      { label: 'Student Name', value: studentName },
       { label: 'Date of Birth', value: formatDisplayDate(payload.dateOfBirth) },
       { label: 'Gender', value: payload.gender },
       { label: 'Grade Applying For', value: payload.gradeApplyingFor },
@@ -138,10 +162,10 @@ async function sendApplicationEmails(payload: {
 
   const parentHtml = buildStyledEmailTemplate({
     title: 'Thank You for Applying',
-    intro: `Dear ${payload.parentName}, thank you for submitting an application for ${payload.studentFirstName} ${payload.studentLastName}. Our admissions team has received your form and will review it shortly.`,
+    intro: `Dear ${payload.parentName}, thank you for submitting an application for ${studentName}. Our admissions team has received your form and will review it shortly.`,
     highlight: 'Next steps will be shared with you after the admissions review.',
     rows: [
-      { label: 'Student Name', value: `${payload.studentFirstName} ${payload.studentLastName}` },
+      { label: 'Student Name', value: studentName },
       { label: 'Grade Applying For', value: payload.gradeApplyingFor },
       { label: 'Parent / Guardian', value: payload.parentName },
       { label: 'Phone Number', value: payload.phoneNumber },
@@ -154,7 +178,7 @@ async function sendApplicationEmails(payload: {
   const officePromise = resend.emails.send({
     from: fromEmail,
     to: [officeEmail],
-    subject: `New admissions application: ${payload.studentFirstName} ${payload.studentLastName}`,
+    subject: `New admissions application: ${studentName}`,
     html: officeHtml,
   })
 
@@ -171,9 +195,17 @@ async function sendApplicationEmails(payload: {
     console.error('Failed to send the school admissions notification email.', officeResult.reason)
     throw new Error('Failed to send school office notification.')
   }
+  if (officeResult.value.error) {
+    console.error('Resend rejected the school admissions notification email.', officeResult.value.error)
+    throw new Error('Failed to send school office notification.')
+  }
 
   if (parentResult.status === 'rejected') {
     console.error('Failed to send the parent admissions confirmation email.', parentResult.reason)
+    throw new Error('Failed to send parent confirmation email.')
+  }
+  if (parentResult.value.error) {
+    console.error('Resend rejected the parent admissions confirmation email.', parentResult.value.error)
     throw new Error('Failed to send parent confirmation email.')
   }
 
@@ -198,6 +230,18 @@ export async function submitApplication(
   const medicalNotes = normalizeText(formData.get('medicalNotes'))
 
   const fieldErrors: Partial<Record<string, string>> = {}
+  const validGenders = new Set(['Female', 'Male', 'Prefer not to say'])
+  const validGrades = new Set([
+    'Baby Class',
+    'Nursery',
+    'Primary 1',
+    'Primary 2',
+    'Primary 3',
+    'Primary 4',
+    'Primary 5',
+    'Primary 6',
+    'Primary 7',
+  ])
 
   if (!studentFirstName || studentFirstName.length < 2) {
     fieldErrors.studentFirstName = 'Student first name must be at least 2 characters.'
@@ -205,32 +249,46 @@ export async function submitApplication(
   if (!studentLastName || studentLastName.length < 2) {
     fieldErrors.studentLastName = 'Student last name must be at least 2 characters.'
   }
-  if (!dateOfBirth) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
     fieldErrors.dateOfBirth = 'Date of birth is required.'
   } else {
-    const dob = new Date(dateOfBirth)
-    const today = new Date()
-    if (Number.isNaN(dob.getTime()) || dob > today) {
+    const dob = new Date(`${dateOfBirth}T00:00:00.000Z`)
+    const [year, month, day] = dateOfBirth.split('-').map(Number)
+    const hasValidCalendarDate =
+      dob.getUTCFullYear() === year &&
+      dob.getUTCMonth() + 1 === month &&
+      dob.getUTCDate() === day
+
+    if (!hasValidCalendarDate || dateOfBirth > new Date().toISOString().slice(0, 10)) {
       fieldErrors.dateOfBirth = 'Date of birth must be valid and cannot be in the future.'
     }
   }
-  if (!gender) fieldErrors.gender = 'Please select the student’s gender.'
-  if (!gradeApplyingFor) fieldErrors.gradeApplyingFor = 'Please select the class your child is applying for.'
+  if (!validGenders.has(gender)) fieldErrors.gender = 'Please select the student’s gender.'
+  if (!validGrades.has(gradeApplyingFor)) {
+    fieldErrors.gradeApplyingFor = 'Please select the class your child is applying for.'
+  }
   if (!parentName || parentName.length < 2) {
     fieldErrors.parentName = 'Parent or guardian name is required.'
   }
   if (!relationship || relationship.length < 2) {
     fieldErrors.relationship = 'Please tell us your relationship to the student.'
   }
-  if (!phoneNumber || !/^\+?[0-9\s-]{7,15}$/.test(phoneNumber)) {
+  if (!/^\+?\d{7,15}$/.test(phoneNumber)) {
     fieldErrors.phoneNumber = 'Please enter a valid phone number.'
   }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     fieldErrors.email = 'Please enter a valid email address.'
   }
   if (!residentialAddress || residentialAddress.length < 8) {
     fieldErrors.residentialAddress = 'Please enter a complete residential address.'
   }
+  if (studentFirstName.length > 80) fieldErrors.studentFirstName = 'Student first name is too long.'
+  if (studentLastName.length > 80) fieldErrors.studentLastName = 'Student last name is too long.'
+  if (previousSchool.length > 120) fieldErrors.previousSchool = 'Previous school must be 120 characters or fewer.'
+  if (parentName.length > 120) fieldErrors.parentName = 'Parent or guardian name must be 120 characters or fewer.'
+  if (relationship.length > 50) fieldErrors.relationship = 'Relationship must be 50 characters or fewer.'
+  if (residentialAddress.length > 250) fieldErrors.residentialAddress = 'Address must be 250 characters or fewer.'
+  if (medicalNotes.length > 2000) fieldErrors.medicalNotes = 'Additional notes must be 2,000 characters or fewer.'
 
   if (Object.keys(fieldErrors).length > 0) {
     return {
@@ -262,6 +320,9 @@ export async function submitApplication(
       })
 
     const applicationId = result[0]?.id
+    if (typeof applicationId !== 'number') {
+      throw new Error('Admissions application was saved without a returned reference number.')
+    }
 
     try {
       await sendApplicationEmails({
@@ -284,7 +345,8 @@ export async function submitApplication(
       return {
         success: false,
         message:
-          'Your application was saved successfully, but the automated email notifications could not be sent. Please contact the school office directly for confirmation.',
+          'Your application was saved, but automated email notifications could not be sent. Please contact the school office and share this reference; you do not need to submit the form again.',
+        applicationId,
       }
     }
 

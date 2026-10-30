@@ -89,10 +89,10 @@ export function Hero() {
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8">
             <Link
-              href="/admissions"
+              href="/contact#inquiry-form"
               className="rounded-full bg-accent px-6 py-3 font-800 text-accent-foreground shadow-lg shadow-accent/30 transition-transform duration-200 hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:px-7 sm:py-3.5"
             >
-              Book Your School Tour Today
+              Request a guided school tour
             </Link>
             <span className="text-xs font-700 text-white/85 sm:text-sm">
               {site.location} · Baby Class – P.7

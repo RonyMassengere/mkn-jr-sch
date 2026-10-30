@@ -1,9 +1,10 @@
 'use client'
 
-import { useActionState, useMemo, useState } from 'react'
+import { useActionState, useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft,
   ArrowRight,
+  AlertCircle,
   BookOpenText,
   CheckCircle2,
   ChevronRight,
@@ -108,11 +109,11 @@ function Field({
           onChange={onChange}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${name}-error` : undefined}
-          className={`${inputClasses} ${error ? 'border-red-300 bg-red-50' : ''}`}
+          className={`${inputClasses} ${error ? 'border-destructive bg-destructive/5' : ''}`}
         />
       )}
       {error && (
-        <span id={`${name}-error`} className="mt-1 block text-xs font-600 text-red-600">
+        <span id={`${name}-error`} className="mt-1 block text-xs font-600 text-destructive">
           {error}
         </span>
       )}
@@ -126,6 +127,20 @@ export function AdmissionsForm() {
   const [formValues, setFormValues] = useState<FormValues>(initialFormValues)
   const [localErrors, setLocalErrors] = useState<Partial<Record<string, string>>>({})
 
+  useEffect(() => {
+    const invalidFields = Object.keys(state.fieldErrors ?? {})
+    const studentFields = ['studentFirstName', 'studentLastName', 'dateOfBirth', 'gender', 'gradeApplyingFor']
+    const parentFields = ['parentName', 'relationship', 'phoneNumber', 'email', 'residentialAddress']
+
+    if (invalidFields.some((field) => studentFields.includes(field))) {
+      setCurrentStep(0)
+    } else if (invalidFields.some((field) => parentFields.includes(field))) {
+      setCurrentStep(1)
+    } else if (invalidFields.includes('medicalNotes')) {
+      setCurrentStep(2)
+    }
+  }, [state.fieldErrors])
+
   const currentStepTitle = steps[currentStep].label
   const currentStepIcon = steps[currentStep].icon
   const ActiveWizardIcon = currentStep === steps.length - 1 ? ClipboardCheck : currentStepIcon
@@ -133,7 +148,7 @@ export function AdmissionsForm() {
 
   const updateField = (field: keyof FormValues, value: string) => {
     setFormValues((prev) => ({ ...prev, [field]: value }))
-    setLocalErrors((prev) => ({ ...prev, [field]: undefined }))
+    setLocalErrors((prev) => ({ ...prev, [field]: '' }))
   }
 
   const validateCurrentStep = () => {
@@ -165,7 +180,8 @@ export function AdmissionsForm() {
       if (!formValues.relationship.trim() || formValues.relationship.trim().length < 2) {
         nextErrors.relationship = 'Please tell us your relationship.'
       }
-      if (!formValues.phoneNumber.trim() || !/^\+?[0-9\s-]{7,15}$/.test(formValues.phoneNumber.trim())) {
+      const normalizedPhone = formValues.phoneNumber.trim().replace(/[^+\d]/g, '')
+      if (!/^\+?\d{7,15}$/.test(normalizedPhone)) {
         nextErrors.phoneNumber = 'Please enter a valid phone number.'
       }
       if (!formValues.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email.trim())) {
@@ -238,7 +254,7 @@ export function AdmissionsForm() {
                 value={formValues.gender}
                 onChange={(event) => updateField('gender', event.target.value)}
                 aria-invalid={Boolean(localErrors.gender ?? state.fieldErrors?.gender)}
-                className={`mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30 ${localErrors.gender || state.fieldErrors?.gender ? 'border-red-300 bg-red-50' : ''}`}
+                className={`mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30 ${localErrors.gender || state.fieldErrors?.gender ? 'border-destructive bg-destructive/5' : ''}`}
               >
                 <option value="">Select gender</option>
                 <option value="Female">Female</option>
@@ -246,7 +262,7 @@ export function AdmissionsForm() {
                 <option value="Prefer not to say">Prefer not to say</option>
               </select>
               {(localErrors.gender ?? state.fieldErrors?.gender) && (
-                <span className="mt-1 block text-xs font-600 text-red-600">
+                <span className="mt-1 block text-xs font-600 text-destructive">
                   {localErrors.gender ?? state.fieldErrors?.gender}
                 </span>
               )}
@@ -259,7 +275,7 @@ export function AdmissionsForm() {
                 value={formValues.gradeApplyingFor}
                 onChange={(event) => updateField('gradeApplyingFor', event.target.value)}
                 aria-invalid={Boolean(localErrors.gradeApplyingFor ?? state.fieldErrors?.gradeApplyingFor)}
-                className={`mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30 ${localErrors.gradeApplyingFor || state.fieldErrors?.gradeApplyingFor ? 'border-red-300 bg-red-50' : ''}`}
+                className={`mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30 ${localErrors.gradeApplyingFor || state.fieldErrors?.gradeApplyingFor ? 'border-destructive bg-destructive/5' : ''}`}
               >
                 <option value="">Select grade</option>
                 <option value="Baby Class">Baby Class</option>
@@ -273,7 +289,7 @@ export function AdmissionsForm() {
                 <option value="Primary 7">Primary 7</option>
               </select>
               {(localErrors.gradeApplyingFor ?? state.fieldErrors?.gradeApplyingFor) && (
-                <span className="mt-1 block text-xs font-600 text-red-600">
+                <span className="mt-1 block text-xs font-600 text-destructive">
                   {localErrors.gradeApplyingFor ?? state.fieldErrors?.gradeApplyingFor}
                 </span>
               )}
@@ -329,7 +345,7 @@ export function AdmissionsForm() {
               placeholder="e.g. 0772 123 456"
               required
               minLength={7}
-              maxLength={15}
+              maxLength={20}
               pattern="[0-9+()\s-]+"
               inputMode="tel"
               value={formValues.phoneNumber}
@@ -412,19 +428,36 @@ export function AdmissionsForm() {
     )
   }
 
-  if (state.success) {
+  if (state.success || state.applicationId) {
+    const notificationIssue = !state.success
+
     return (
-      <div className="rounded-[2rem] border border-border bg-card p-8 text-center shadow-[0_20px_60px_-30px_rgba(48,63,159,0.35)] sm:p-10">
-        <div className="mx-auto grid size-16 place-items-center rounded-full bg-primary/10 text-primary shadow-[0_12px_30px_-18px_rgba(48,63,159,0.5)]">
-          <GraduationCap className="size-8 transition-transform duration-300 hover:scale-105" />
+      <div
+        role={notificationIssue ? 'alert' : 'status'}
+        aria-live="polite"
+        className="rounded-[2rem] border border-border bg-card p-8 text-center shadow-[0_20px_60px_-30px_rgba(48,63,159,0.35)] sm:p-10"
+      >
+        <div className={`mx-auto grid size-16 place-items-center rounded-full shadow-[0_12px_30px_-18px_rgba(48,63,159,0.5)] ${notificationIssue ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+          {notificationIssue ? <AlertCircle className="size-8" /> : <GraduationCap className="size-8 transition-transform duration-300 hover:scale-105" />}
         </div>
-        <h3 className="mt-5 font-display text-2xl font-800 text-primary">Application received</h3>
+        <h3 className="mt-5 font-display text-2xl font-800 text-primary">
+          {notificationIssue ? 'Application saved; email follow-up unavailable' : 'Application received'}
+        </h3>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{state.message}</p>
         {state.applicationId ? (
           <p className="mt-4 text-xs font-700 uppercase tracking-[0.18em] text-accent">
             Reference no: {state.applicationId}
           </p>
         ) : null}
+        {notificationIssue && (
+          <a
+            href="/contact"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-800 text-accent-foreground transition-transform hover:scale-[1.02]"
+          >
+            Contact the school office
+            <ArrowRight className="size-4" />
+          </a>
+        )}
       </div>
     )
   }
@@ -432,6 +465,9 @@ export function AdmissionsForm() {
   return (
     <form
       action={formAction}
+      onSubmit={(event) => {
+        if (currentStep !== steps.length - 1) event.preventDefault()
+      }}
       className="rounded-[2rem] border border-border bg-card p-6 shadow-[0_20px_60px_-30px_rgba(48,63,159,0.35)] sm:p-8"
     >
       <div className="flex items-center gap-3">
@@ -451,6 +487,11 @@ export function AdmissionsForm() {
         </div>
         <div className="h-2.5 w-full overflow-hidden rounded-full bg-primary/10">
           <div
+            role="progressbar"
+            aria-label={`Application progress: step ${currentStep + 1} of ${steps.length}`}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPercent}
             className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-300 ease-out"
             style={{ width: `${progressPercent}%` }}
           />
@@ -492,7 +533,7 @@ export function AdmissionsForm() {
       </div>
 
       {state.message && !state.success && (
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-600 text-red-700">
+        <div role="alert" className="mt-6 rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm font-600 text-destructive">
           {state.message}
         </div>
       )}
@@ -519,7 +560,10 @@ export function AdmissionsForm() {
           {currentStep < steps.length - 1 ? (
             <button
               type="button"
-              onClick={goToNextStep}
+              onClick={(event) => {
+                event.preventDefault()
+                goToNextStep()
+              }}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-800 text-accent-foreground shadow-sm transition-transform duration-200 hover:scale-[1.02]"
             >
               Next

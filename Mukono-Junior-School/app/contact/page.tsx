@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Phone, Mail, MapPin, Clock } from 'lucide-react'
+import { Phone, Mail, MapPin, Clock, MessageCircle } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { Reveal } from '@/components/reveal'
 import { ContactForm } from '@/components/contact-form'
@@ -51,6 +51,15 @@ export default function ContactPage() {
                           </a>
                         ))}
                       </div>
+                      <a
+                        href={site.socials.whatsapp}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-2 inline-flex items-center gap-2 text-sm font-700 text-gold transition-colors hover:text-white"
+                      >
+                        <MessageCircle className="size-4" />
+                        Chat with us on WhatsApp
+                      </a>
                     </div>
                   </li>
 
@@ -90,11 +99,11 @@ export default function ContactPage() {
                     </span>
                     <div>
                       <p className="text-xs font-700 uppercase tracking-wide text-gold">
-                        School hours
+                        Administration hours
                       </p>
                       <p className="mt-1 font-600">Monday – Friday</p>
                       <p className="text-sm text-cream/75">
-                        Please call ahead to arrange a visit
+                        Call ahead to confirm office availability and arrange your visit.
                       </p>
                     </div>
                   </li>

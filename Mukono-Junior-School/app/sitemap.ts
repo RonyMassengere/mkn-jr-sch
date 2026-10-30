@@ -3,7 +3,21 @@ import { site } from '@/lib/site'
 import { getAllNews } from '@/lib/news'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = ['', '/about', '/academics', '/gallery', '/staff', '/news', '/contact'].map(
+  const routes = [
+    '',
+    '/about',
+    '/admissions',
+    '/admissions/apply',
+    '/academics',
+    '/student-life',
+    '/parents-hub',
+    '/gallery',
+    '/staff',
+    '/news',
+    '/news/events',
+    '/news/facilities',
+    '/contact',
+  ].map(
     (path) => ({
       url: `${site.url}${path}`,
       lastModified: new Date(),

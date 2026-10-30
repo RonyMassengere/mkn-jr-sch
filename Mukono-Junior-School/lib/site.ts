@@ -23,6 +23,7 @@ export const nav = [
   { label: 'Admissions', href: '/admissions' },
   { label: 'About', href: '/about' },
   { label: 'Academics', href: '/academics' },
+  { label: 'Student Life', href: '/student-life' },
   { label: 'Parents Hub', href: '/parents-hub' },
   { label: 'Gallery', href: '/gallery' },
   { label: 'Staff', href: '/staff' },

@@ -87,7 +87,8 @@ export async function GET(request: Request) {
       .slice(0, 4)
 
     return NextResponse.json({ events })
-  } catch {
+  } catch (error) {
+    console.error('Failed to fetch public school calendar events:', error)
     return NextResponse.json({ events: [] }, { status: 500 })
   }
 }

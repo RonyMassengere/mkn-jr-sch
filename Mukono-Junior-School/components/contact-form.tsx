@@ -22,9 +22,14 @@ export function ContactForm() {
       // mailto fallback
       const name = String(data.get('name') ?? '')
       const email = String(data.get('email') ?? '')
+      const phone = String(data.get('phone') ?? '')
+      const enquiryType = String(data.get('enquiryType') ?? 'general')
+      const preferredVisitDate = String(data.get('preferredVisitDate') ?? '')
       const message = String(data.get('message') ?? '')
-      const subject = encodeURIComponent(`Website enquiry from ${name}`)
-      const body = encodeURIComponent(`${message}\n\nFrom: ${name} (${email})`)
+      const subject = encodeURIComponent(`${enquiryType === 'school-tour' ? 'School tour request' : 'Website enquiry'} from ${name}`)
+      const body = encodeURIComponent(
+        `${message}\n\nEnquiry type: ${enquiryType}\nPreferred visit date: ${preferredVisitDate || 'Not specified'}\nFrom: ${name} (${email})\nPhone: ${phone || 'Not provided'}`,
+      )
       window.location.href = `mailto:${site.email}?subject=${subject}&body=${body}`
       return
     }
@@ -53,7 +58,7 @@ export function ContactForm() {
         <CheckCircle2 className="size-12 text-primary" />
         <h3 className="font-display text-xl font-700 text-primary">Message sent!</h3>
         <p className="text-sm text-muted-foreground">
-          Thank you for reaching out. We&apos;ll get back to you as soon as we can.
+          Thank you for reaching out. Our team will respond to your enquiry and confirm school tour availability directly.
         </p>
         <button
           type="button"
@@ -70,6 +75,22 @@ export function ContactForm() {
     <form id="inquiry-form" onSubmit={handleSubmit} className="rounded-2xl border border-border bg-card p-6 sm:p-8">
       <div className="grid gap-5">
         <div className="grid gap-2">
+          <label htmlFor="enquiryType" className="text-sm font-700 text-foreground">
+            How can our team help?
+          </label>
+          <select
+            id="enquiryType"
+            name="enquiryType"
+            defaultValue="general"
+            className="rounded-xl border border-input bg-background px-4 py-3 text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
+          >
+            <option value="general">General school enquiry</option>
+            <option value="admissions">Admissions guidance</option>
+            <option value="school-tour">Request a guided school tour</option>
+          </select>
+        </div>
+
+        <div className="grid gap-2">
           <label htmlFor="name" className="text-sm font-700 text-foreground">
             Your name
           </label>
@@ -81,6 +102,33 @@ export function ContactForm() {
             autoComplete="name"
             className="rounded-xl border border-input bg-background px-4 py-3 text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
             placeholder="e.g. Jane Namubiru"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <label htmlFor="phone" className="text-sm font-700 text-foreground">
+            Phone number for follow-up
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            className="rounded-xl border border-input bg-background px-4 py-3 text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
+            placeholder="e.g. 0701 651 477"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <label htmlFor="preferredVisitDate" className="text-sm font-700 text-foreground">
+            Preferred tour date
+            <span className="ml-1 font-400 text-muted-foreground">(optional)</span>
+          </label>
+          <input
+            id="preferredVisitDate"
+            name="preferredVisitDate"
+            type="date"
+            className="rounded-xl border border-input bg-background px-4 py-3 text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
 

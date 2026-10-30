@@ -139,19 +139,23 @@ export function ParentHub() {
   const folderId = process.env.NEXT_PUBLIC_DRIVE_FOLDER_ID
   const apiKey = process.env.NEXT_PUBLIC_DRIVE_API_KEY
   const calendarSrc = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_IFRAME_SRC
+  const calendarId = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_ID || 'f79a29b7b08c854ed65b587c5f1ef6a680fbcf82f6f4b531cffbbea97b6f67ef@group.calendar.google.com'
+  const calendarDownloadHref = `https://calendar.google.com/calendar/ical/${encodeURIComponent(calendarId)}/public/basic.ics`
 
   const [files, setFiles] = useState<DriveFile[]>([])
   const [events, setEvents] = useState<HighlightItem[]>([])
   const [loading, setLoading] = useState(true)
   const [calendarLoading, setCalendarLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [calendarError, setCalendarError] = useState<string | null>(null)
 
   useEffect(() => {
     let isActive = true
 
     const loadDriveFiles = async () => {
       if (!folderId || !apiKey) {
-        setError('Google Drive environment variables are missing. Add NEXT_PUBLIC_DRIVE_FOLDER_ID and NEXT_PUBLIC_DRIVE_API_KEY to your .env.local file.')
+        console.error('Parent hub document storage is not configured.')
+        setError('Parent downloads are temporarily unavailable. Please contact the school office for current circulars and holiday homework.')
         setLoading(false)
         return
       }
@@ -173,10 +177,10 @@ export function ParentHub() {
           setError(null)
         }
       } catch (loadError) {
-        const message = loadError instanceof Error ? loadError.message : 'Unable to load Google Drive files.'
+        console.error('Failed to load parent hub documents:', loadError)
 
         if (isActive) {
-          setError(message)
+          setError('We could not load parent downloads right now. Please contact the school office for current circulars and holiday homework.')
           setFiles([])
         }
       } finally {
@@ -187,9 +191,8 @@ export function ParentHub() {
     }
 
     const loadCalendarEvents = async () => {
-      const calendarId = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_ID || 'f79a29b7b08c854ed65b587c5f1ef6a680fbcf82f6f4b531cffbbea97b6f67ef@group.calendar.google.com'
-
       if (isActive) setCalendarLoading(true)
+      if (isActive) setCalendarError(null)
 
       if (!calendarId) {
         if (isActive) {
@@ -214,9 +217,12 @@ export function ParentHub() {
           setEvents(payload.events ?? [])
           setCalendarLoading(false)
         }
-      } catch {
+      } catch (loadError) {
+        console.error('Failed to load school calendar events:', loadError)
+
         if (isActive) {
           setEvents([])
+          setCalendarError('We could not load upcoming dates. Please contact the school office to confirm the current term calendar.')
           setCalendarLoading(false)
         }
       }
@@ -240,12 +246,20 @@ export function ParentHub() {
               School updates, documents &amp; calendar
             </h1>
           </div>
-          <a
-            href="/academics"
-            className="parent-hub-button inline-flex w-full items-center justify-center rounded-full border border-border bg-white/70 px-4 py-2.5 text-sm font-700 text-primary shadow-sm backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:text-accent sm:w-auto md:self-end"
-          >
-            Back to Academics
-          </a>
+          <div className="flex flex-col gap-2 sm:flex-row md:self-end">
+            <a
+              href="/staff"
+              className="parent-hub-button inline-flex w-full items-center justify-center rounded-full border border-border bg-white/70 px-4 py-2.5 text-sm font-700 text-primary shadow-sm backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:text-accent sm:w-auto"
+            >
+              Meet the school team
+            </a>
+            <a
+              href="/academics"
+              className="parent-hub-button inline-flex w-full items-center justify-center rounded-full border border-border bg-white/70 px-4 py-2.5 text-sm font-700 text-primary shadow-sm backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:text-accent sm:w-auto"
+            >
+              Back to Academics
+            </a>
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -254,7 +268,7 @@ export function ParentHub() {
               <div className="resource-header flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-display text-2xl font-800 text-primary">Parent resources</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Updated documents from the school drive.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Find holiday homework, term circulars, school notices, and learning resources shared for families.</p>
                 </div>
                 <span className="resource-badge inline-flex items-center rounded-full bg-primary/10 px-3 py-1.5 text-[10px] font-800 uppercase tracking-[0.18em] text-primary">
                   Drive
@@ -330,9 +344,17 @@ export function ParentHub() {
                   <p className="font-display text-2xl font-800 text-primary">School calendar</p>
                   <p className="mt-1 text-sm text-muted-foreground">Important dates, school events, and parent reminders.</p>
                 </div>
-                <span className="calendar-badge grid size-11 place-items-center rounded-2xl bg-secondary text-secondary-foreground shadow-sm">
-                  <CalendarDays className="size-5" />
-                </span>
+                <a
+                  href={calendarDownloadHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="calendar-badge inline-flex shrink-0 items-center gap-2 rounded-full bg-secondary px-3 py-2 text-xs font-800 text-secondary-foreground shadow-sm transition-transform hover:scale-[1.02] sm:px-4 sm:text-sm"
+                  aria-label="Download the school calendar"
+                >
+                  <CalendarDays className="size-4" />
+                  <span className="hidden sm:inline">Download calendar</span>
+                  <span className="sm:hidden">Calendar</span>
+                </a>
               </div>
 
               {calendarSrc ? (
@@ -347,7 +369,7 @@ export function ParentHub() {
                 </div>
               ) : (
                 <div className="rounded-2xl border border-dashed border-border bg-muted/40 p-8 text-sm text-muted-foreground">
-                  The school calendar is being prepared. Once it is published, key dates and events will appear here.
+                  The calendar view is temporarily unavailable. Please contact the school office to confirm upcoming term dates and events.
                 </div>
               )}
             </div>
@@ -364,6 +386,10 @@ export function ParentHub() {
                   <div className="flex items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-white/80 p-4 text-sm font-600 text-muted-foreground">
                     <Loader2 className="size-4 animate-spin text-primary" />
                     Loading upcoming dates...
+                  </div>
+                ) : calendarError ? (
+                  <div role="alert" className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                    {calendarError}
                   </div>
                 ) : events.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-border bg-white/80 p-4 text-sm text-muted-foreground">

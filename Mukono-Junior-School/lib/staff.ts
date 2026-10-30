@@ -1,8 +1,5 @@
-// Staff directory. Names below are placeholders; replace them with real
-// staff information as the school finalises its leadership and teaching team.
-
 export type StaffMember = {
-  name: string
+  name?: string
   role: string
   bio?: string
   image?: string
@@ -20,14 +17,13 @@ export const leadership: StaffMember[] = [
   },
   {
     name: 'Onyu Augstine',
-    role: 'Accountant of School',
+    role: 'School Accountant',
     bio: 'Oversees school finances, budgeting, and financial planning.',
     image: '/images/staff/ACC.jpeg',
   },
   {
-    name: '',
-    role: 'Directors of School',
-    bio: "Provides strategic leadership, governance, and long-term vision to ensure the school`s growth and success.",
+    role: 'School Directors',
+    bio: 'Provide strategic leadership and long-term direction for Mukono Junior School.',
     image: '/images/staff/Directors2.jpg',
   },
 ]
@@ -43,7 +39,7 @@ export const prefectorialBody: StaffMember[] = [
 
 export const maleTeachers: StaffMember[] = [
   {
-    name: 'Male Staff Teachers',
+    name: 'Classroom and subject teaching team',
     role: 'School Teaching Team',
     gender: 'male',
     image: '/images/staff/male_teachers.jpeg',
@@ -52,7 +48,7 @@ export const maleTeachers: StaffMember[] = [
 
 export const femaleTeachers: StaffMember[] = [
   {
-    name: 'Female Staff Teachers',
+    name: 'Early years and classroom educators',
     role: 'School Teaching Team',
     gender: 'female',
     image: '/images/staff/female_teachers.jpeg',

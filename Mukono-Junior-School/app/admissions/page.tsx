@@ -56,11 +56,18 @@ const downloads = [
     icon: FileText,
   },
   {
-    title: 'Fee schedule guide',
-    description: 'Transparent term-by-term guidance to help parents plan ahead with confidence.',
+    title: 'Current fee schedule',
+    description: 'Download the latest class-by-class tuition and requirements published by the school.',
+    href: '/api/fees?format=csv',
+    label: 'Download fee schedule',
+    icon: BookOpen,
+  },
+  {
+    title: 'Fee planning guide',
+    description: 'Understand how class level, study arrangement, materials, and payment guidance are confirmed with families.',
     href: '/fee-guide.txt',
     label: 'Download fee guide',
-    icon: BookOpen,
+    icon: FileText,
   },
 ] as const
 
@@ -202,8 +209,12 @@ export default function AdmissionsPage() {
             <div className="mt-7 rounded-2xl border border-white/15 bg-white/8 p-4">
               <p className="font-display text-lg font-800 text-gold">Need the exact figures?</p>
               <p className="mt-2 text-sm leading-relaxed text-primary-foreground/80">
-                Our admissions team can walk you through class-specific school charges, material needs, and payment guidance.
+                Review the live class-by-class schedule on our Academics page or ask the admissions team to explain current charges, included materials, and payment guidance.
               </p>
+              <Link href="/academics#fee-structure" className="mt-3 inline-flex items-center gap-2 text-sm font-800 text-gold underline underline-offset-4">
+                View the current fee table
+                <ArrowRight className="size-4" />
+              </Link>
             </div>
           </div>
         </div>
@@ -236,7 +247,7 @@ export default function AdmissionsPage() {
                   href="/contact#inquiry-form"
                   className="inline-flex items-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-800 text-charcoal transition-transform duration-200 hover:scale-[1.02]"
                 >
-                  Book Your School Tour Today
+                  Request a guided school tour
                 </Link>
                 <a
                   href="https://wa.me/256701651477"

@@ -75,7 +75,7 @@ export default function AboutPage() {
                   backgroundImage:
                     "url('/images/hero/hero3.jpeg')",
                 }}
-                aria-label="School image placeholder"
+                aria-label="Pupils learning and growing at Mukono Junior School"
                 role="img"
               >
                 <div className="flex h-full min-h-[420px] items-end bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent p-6 sm:p-8">

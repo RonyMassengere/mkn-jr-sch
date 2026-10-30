@@ -18,8 +18,8 @@ function Avatar({ member, size }: { member: StaffMember; size: 'lg' | 'md' }) {
     return (
       <div className={`relative ${dimension} overflow-hidden rounded-2xl border border-border bg-muted`}>
         <Image
-          src={member.image || '/placeholder.svg'}
-          alt={member.name}
+          src={member.image}
+          alt={member.name || member.role}
           fill
           sizes="(max-width: 768px) 100vw, 20vw"
           quality={80}
@@ -29,7 +29,7 @@ function Avatar({ member, size }: { member: StaffMember; size: 'lg' | 'md' }) {
     )
   }
 
-  const monogram = initials(member.name)
+  const monogram = initials(member.name || member.role)
 
   return (
     <div
@@ -54,18 +54,24 @@ function StaffSection({ title, description, members }: { title: string; descript
         <Reveal>
           <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
-              <Image
-                src={mainMember.image || '/placeholder.svg'}
-                alt={mainMember.name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                quality={85}
-              />
+              {mainMember.image ? (
+                <Image
+                  src={mainMember.image}
+                  alt={mainMember.name || mainMember.role}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  quality={85}
+                />
+              ) : (
+                <div className="grid h-full place-items-center bg-muted">
+                  <Avatar member={mainMember} size="lg" />
+                </div>
+              )}
             </div>
             <div className="p-5">
-              <h3 className="font-display text-xl font-700 text-primary">{mainMember.role}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{mainMember.name}</p>
+              <h3 className="font-display text-xl font-700 text-primary">{mainMember.name || mainMember.role}</h3>
+              {mainMember.name && <p className="mt-1 text-sm text-muted-foreground">{mainMember.role}</p>}
             </div>
           </article>
         </Reveal>
@@ -75,12 +81,15 @@ function StaffSection({ title, description, members }: { title: string; descript
 }
 
 export default function StaffPage() {
+  const headTeacher = leadership[0]
+  const headTeacherImage = headTeacher?.secondaryImage ?? headTeacher?.image
+
   return (
     <>
       <PageHeader
         eyebrow="Our Staff"
         title="The people behind our pupils"
-        description="A warm, committed team who know every child by name. Staff profiles shown here are placeholders and can be updated with final school photos and names when ready."
+        description="Meet the school leaders, teachers, and caring adults who guide learning, wellbeing, and character building at Mukono Junior School."
       />
 
       <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
@@ -93,19 +102,25 @@ export default function StaffPage() {
             <Reveal key={member.role} delay={i * 90}>
               <article className="flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
                 <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
-                  <Image
-                    src={member.image || '/placeholder.svg'}
-                    alt={member.name}
-                    fill
-                    className="object-cover"
-                    style={{ objectPosition: 'right center right' }}
-                    sizes="(max-width: 1024px) 100vw, 33vw"
-                    quality={80}
-                  />
+                    {member.image ? (
+                      <Image
+                        src={member.image}
+                        alt={member.name || member.role}
+                        fill
+                        className="object-cover"
+                        style={{ objectPosition: 'right center' }}
+                        sizes="(max-width: 1024px) 100vw, 33vw"
+                        quality={80}
+                      />
+                    ) : (
+                      <div className="grid h-full place-items-center">
+                        <Avatar member={member} size="lg" />
+                      </div>
+                    )}
                 </div>
                 <div className="p-5">
-                  <h3 className="font-display text-xl font-700 text-primary">{member.name}</h3>
-                  <p className="mt-1 text-sm font-700 text-accent">{member.role}</p>
+                  <h3 className="font-display text-xl font-700 text-primary">{member.name || member.role}</h3>
+                  {member.name && <p className="mt-1 text-sm font-700 text-accent">{member.role}</p>}
                   {member.bio && (
                     <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
                   )}
@@ -116,21 +131,27 @@ export default function StaffPage() {
         </div>
       </section>
 
-      {leadership[0] && (
+      {headTeacher && (
         <section className="bg-leaf-deep py-16 text-cream sm:py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 lg:grid-cols-[auto_1fr] lg:gap-12 lg:px-8">
             <Reveal>
               <div className="mx-auto flex h-[220px] w-[220px] items-center justify-center overflow-hidden rounded-full border-4 border-gold/80 bg-cream/10 p-1 shadow-xl sm:h-[260px] sm:w-[260px] lg:h-[300px] lg:w-[300px]">
                 <div className="relative h-full w-full overflow-hidden rounded-full">
-                  <Image
-                    src={leadership[0].secondaryImage || leadership[0].image || '/placeholder.svg'}
-                    alt={leadership[0].name}
-                    fill
-                    className="object-cover object-center"
-                    style={{ objectPosition: 'left center' }}
-                    sizes="(max-width: 768px) 100vw, 25vw"
-                    quality={85}
-                  />
+                  {headTeacherImage ? (
+                    <Image
+                      src={headTeacherImage}
+                      alt={headTeacher.name || headTeacher.role}
+                      fill
+                      className="object-cover object-center"
+                      style={{ objectPosition: 'left center' }}
+                      sizes="(max-width: 768px) 100vw, 25vw"
+                      quality={85}
+                    />
+                  ) : (
+                    <div className="grid h-full place-items-center">
+                      <Avatar member={headTeacher} size="lg" />
+                    </div>
+                  )}
                 </div>
               </div>
             </Reveal>
@@ -143,8 +164,8 @@ export default function StaffPage() {
                   “At Mukono Junior School, we believe every child arrives with a unique light to share. Our role is to give them the care, discipline, and opportunity to let that light grow brightly.”
                 </blockquote>
                 <div className="mt-6">
-                  <p className="font-display text-lg font-700 text-cream">{leadership[0].name}</p>
-                  <p className="text-sm text-cream/70">{leadership[0].role}</p>
+                  <p className="font-display text-lg font-700 text-cream">{headTeacher.name || headTeacher.role}</p>
+                  <p className="text-sm text-cream/70">{headTeacher.role}</p>
                 </div>
               </div>
             </Reveal>
@@ -163,14 +184,20 @@ export default function StaffPage() {
           <Reveal>
             <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
               <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
-                <Image
-                  src={prefectorialBody[0].image || '/placeholder.svg'}
-                  alt={prefectorialBody[0].name}
-                  fill
-                  className="object-cover"
-                  sizes="100vw"
-                  quality={85}
-                />
+                {prefectorialBody[0].image ? (
+                  <Image
+                    src={prefectorialBody[0].image}
+                    alt={prefectorialBody[0].name || prefectorialBody[0].role}
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                    quality={85}
+                  />
+                ) : (
+                  <div className="grid h-full place-items-center">
+                    <Avatar member={prefectorialBody[0]} size="lg" />
+                  </div>
+                )}
               </div>
               <div className="p-5">
                 <h3 className="font-display text-2xl font-700 text-primary">{prefectorialBody[0].role}</h3>
@@ -190,8 +217,8 @@ export default function StaffPage() {
           />
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:gap-8">
-            <StaffSection title="Male Staff Teachers" description="Primary classroom and subject support across the school." members={maleTeachers} />
-            <StaffSection title="Female Staff Teachers" description="Early years, literacy, pastoral and classroom leadership support." members={femaleTeachers} />
+            <StaffSection title="Classroom & Subject Teachers" description="Dedicated educators guide learning and progress across the school." members={maleTeachers} />
+            <StaffSection title="Early Years & Classroom Educators" description="Caring teachers support foundational learning, confidence, and pupil wellbeing." members={femaleTeachers} />
           </div>
         </div>
       </section>

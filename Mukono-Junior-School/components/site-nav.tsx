@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
-import { nav, site } from '@/lib/site'
+import { site } from '@/lib/site'
 import { SocialLinks } from '@/components/social-links'
 
 const primaryLinks = [
@@ -19,6 +19,7 @@ const primaryLinks = [
 
 const secondaryLinks = [
   { label: 'About', href: '/about' },
+  { label: 'Student Life', href: '/student-life' },
   { label: 'Staff', href: '/staff' },
   { label: 'Gallery', href: '/gallery' },
   {
@@ -47,9 +48,25 @@ export function SiteNav() {
   }, [])
 
   useEffect(() => {
-    setOpen(false)
     setDesktopMoreOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (!open) return
+
+    const previousOverflow = document.body.style.overflow
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -90,15 +107,15 @@ export function SiteNav() {
             </span>
           </Link>
 
-          <div className="hidden flex-1 justify-center lg:flex">
-            <ul className="flex min-w-0 max-w-full flex-wrap items-center justify-center gap-1">
+          <div className="hidden min-w-0 flex-1 justify-center md:flex">
+            <ul className="flex min-w-0 max-w-full items-center justify-center gap-0.5">
               {primaryLinks.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     className={cn(
-                      'relative inline-flex rounded-full px-2.5 py-2 text-xs font-700 text-[#303f9f] transition-colors duration-200 hover:bg-[#f7e600]/25 hover:text-[#c91f2b] xl:px-3 xl:text-sm',
-                      isActive(item.href) ? 'text-accent accent-underline' : 'text-[#303f9f]',
+                      'relative inline-flex rounded-full px-2 py-2 text-[11px] font-700 text-primary transition-colors duration-200 hover:bg-secondary/25 hover:text-accent lg:px-2.5 lg:text-xs xl:px-3 xl:text-sm',
+                      isActive(item.href) ? 'text-accent accent-underline' : 'text-primary',
                     )}
                   >
                     {item.label}
@@ -113,7 +130,7 @@ export function SiteNav() {
               >
                 <button
                   type="button"
-                  onFocus={() => setDesktopMoreOpen(true)}
+                  onClick={() => setDesktopMoreOpen((value) => !value)}
                   onBlur={(event) => {
                     const nextTarget = event.relatedTarget as Node | null
                     if (!event.currentTarget.parentElement?.contains(nextTarget)) {
@@ -121,15 +138,21 @@ export function SiteNav() {
                     }
                   }}
                   className={cn(
-                    'inline-flex items-center gap-1 rounded-full px-2.5 py-2 text-xs font-700 transition-colors duration-200 hover:bg-[#f7e600]/25 hover:text-[#c91f2b] xl:px-3 xl:text-sm',
-                    desktopMoreOpen ? 'bg-[#f7e600]/25 text-[#c91f2b]' : 'text-[#303f9f]',
+                    'inline-flex items-center gap-1 rounded-full px-2 py-2 text-[11px] font-700 transition-colors duration-200 hover:bg-secondary/25 hover:text-accent lg:px-2.5 lg:text-xs xl:px-3 xl:text-sm',
+                    desktopMoreOpen ? 'bg-secondary/25 text-accent' : 'text-primary',
                   )}
+                  aria-haspopup="true"
+                  aria-expanded={desktopMoreOpen}
+                  aria-controls="desktop-more-menu"
                 >
                   More
                   <ChevronDown className={cn('size-3.5 transition-transform duration-200', desktopMoreOpen && 'rotate-180')} />
                 </button>
 
                 <div
+                  id="desktop-more-menu"
+                  aria-hidden={!desktopMoreOpen}
+                  inert={!desktopMoreOpen}
                   className={cn(
                     'absolute left-1/2 top-full z-20 mt-1 w-56 -translate-x-1/2 rounded-2xl border border-border bg-white p-2 shadow-xl transition-all duration-200',
                     desktopMoreOpen ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0',
@@ -204,6 +227,7 @@ export function SiteNav() {
               className="grid size-11 place-items-center rounded-full border border-white/60 bg-white/45 text-primary shadow-[0_10px_30px_-15px_rgba(48,63,159,0.35)] backdrop-blur-xl transition-all duration-200 hover:bg-white/70 md:hidden"
               aria-label={open ? 'Close menu' : 'Open menu'}
               aria-expanded={open}
+              aria-controls="mobile-navigation-drawer"
             >
               {open ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
@@ -211,16 +235,31 @@ export function SiteNav() {
         </nav>
       </div>
 
-      {open && (
-        <div className="fixed inset-0 z-50 md:hidden">
+      <div
+        className={cn(
+          'fixed inset-0 z-50 transition-[visibility] duration-300 md:hidden',
+          open ? 'visible' : 'invisible pointer-events-none',
+        )}
+        aria-hidden={!open}
+        inert={!open}
+      >
           <button
             type="button"
             aria-label="Close menu overlay"
-            className="absolute inset-0 bg-slate-950/60"
+            className={cn('absolute inset-0 bg-charcoal/60 transition-opacity duration-300', open ? 'opacity-100' : 'opacity-0')}
             onClick={() => setOpen(false)}
           />
 
-          <aside className="absolute left-0 top-0 flex h-screen w-[80%] max-w-sm flex-col border-r border-border bg-white shadow-2xl transition-transform duration-300 ease-out">
+          <aside
+            id="mobile-navigation-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile school navigation"
+            className={cn(
+              'absolute left-0 top-0 flex h-screen w-[80%] max-w-sm flex-col border-r border-border bg-white shadow-2xl transition-transform duration-300 ease-out',
+              open ? 'translate-x-0' : '-translate-x-full',
+            )}
+          >
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <div className="flex items-center gap-3">
                 <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
@@ -268,12 +307,17 @@ export function SiteNav() {
                         type="button"
                         onClick={() => toggleMobileAccordion(item.label)}
                         className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-base font-700 text-foreground"
+                        aria-expanded={isOpen}
+                        aria-controls={`mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}-links`}
                       >
                         {item.label}
                         <ChevronDown className={cn('size-4 transition-transform', isOpen && 'rotate-180')} />
                       </button>
 
-                      <div className={cn('overflow-hidden transition-all duration-300', isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0')}>
+                      <div
+                        id={`mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}-links`}
+                        className={cn('overflow-hidden transition-all duration-300', isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0')}
+                      >
                         <div className="space-y-1 border-l border-border/80 pl-3 pt-2">
                           {item.items.map((subItem) => (
                             <Link
@@ -324,8 +368,7 @@ export function SiteNav() {
               </div>
             </div>
           </aside>
-        </div>
-      )}
+      </div>
     </header>
   )
 }
