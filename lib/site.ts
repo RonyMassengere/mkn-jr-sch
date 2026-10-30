@@ -17,7 +17,7 @@ export const site = {
   socials: {
     whatsapp: 'https://wa.me/256701651477',
     facebook: 'https://www.facebook.com/',
-    tiktok: 'https://www.tiktok.com/',
+    tiktok: 'https://www.tiktok.com/@mukonojuniorschool3?is_from_webapp=1&sender_device=pc',
     instagram: 'https://www.instagram.com/',
   },
   // Formspree endpoint — replace "yourFormId" with the school's real form ID.
